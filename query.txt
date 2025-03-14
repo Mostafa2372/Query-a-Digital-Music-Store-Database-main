@@ -1,0 +1,61 @@
+WITH t1 AS
+  (SELECT mediaType_name
+   FROM
+     (SELECT MediaType.Name AS mediaType_name,
+             COUNT(Customer.CustomerId) AS media_count
+      FROM MediaType
+      JOIN Track ON track.MediaTypeId = MediaType.MediaTypeId
+      JOIN InvoiceLine ON InvoiceLine.TrackId=Track.TrackId
+      JOIN Invoice ON InvoiceLine.InvoiceId = Invoice.InvoiceId
+      JOIN Customer ON Invoice.CustomerId=Customer.CustomerId
+      GROUP BY 1
+      ORDER BY 2 DESC)ins)
+SELECT Track.Name AS song,
+       MediaType.Name,
+       COUNT(*) AS listening_times
+FROM MediaType
+JOIN Track ON track.MediaTypeId = MediaType.MediaTypeId
+WHERE MediaType.Name =
+    (SELECT *
+     FROM T1)
+GROUP BY 1,
+         2
+ORDER BY 3 DESC
+LIMIT 10
+=========================================================================
+SELECT STRFTIME('%Y', Invoice.InvoiceDate) Invoice_date,
+       COUNT(Track.TrackId)
+FROM Track
+JOIN InvoiceLine ON InvoiceLine.TrackId=Track.TrackId
+JOIN Invoice ON InvoiceLine.InvoiceId = Invoice.InvoiceId
+GROUP BY 1
+ORDER BY 2 DESC
+==========================================================================
+SELECT Customer.CustomerId,
+       Customer.FirstName AS customar_name,
+       SUM(Invoice.Total) AS total_spend
+FROM Track
+JOIN InvoiceLine ON InvoiceLine.TrackId=Track.TrackId
+JOIN Invoice ON InvoiceLine.InvoiceId = Invoice.InvoiceId
+JOIN Customer ON Invoice.CustomerId=Customer.CustomerId
+WHERE Invoice.InvoiceDate BETWEEN '2009-01-01' AND '2012-01-01'
+GROUP BY 1,
+         2
+ORDER BY 3 DESC
+LIMIT 10
+============================================================================
+SELECT track.Name AS song,
+       Genre.Name AS song_type,
+       COUNT(*) AS listening_times
+FROM Track
+JOIN Genre ON Track.GenreId=Genre.GenreId
+JOIN InvoiceLine ON InvoiceLine.TrackId=Track.TrackId
+JOIN Invoice ON InvoiceLine.InvoiceId = Invoice.InvoiceId
+JOIN Customer ON Invoice.CustomerId=Customer.CustomerId
+WHERE Genre.Name='Rock'
+  AND Customer.Country='USA'
+GROUP BY 1,
+         2
+ORDER BY 3 DESC
+LIMIT 3
+================================================================================
